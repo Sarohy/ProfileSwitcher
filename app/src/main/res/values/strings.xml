@@ -1,0 +1,13 @@
+<resources>
+    <string name="app_name">Auto Vibrate</string>
+    <string name="title_activity_maps">Map</string>
+
+    <string name="App_Id">353690981659260</string>
+
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+    
+    <string name="interstitial_full_screen">ca-app-pub-2441083079797240/4469421810</string>
+    <string name="google_maps_key" templateMergeStrategy="preserve" translatable="false">AIzaSyCzgWW-afDY69Ge8VheIqg-VjkrR7PhE0c</string>
+
+</resources>
