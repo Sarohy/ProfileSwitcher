@@ -14,10 +14,10 @@ import java.util.Calendar;
 public class TimePicker extends DialogFragment implements TimePickerDialog.OnTimeSetListener {
 
 
-    static int count=0;
+    static int count = 0;
 
-    static boolean isstart=false;
-    static boolean isending=false;
+    static boolean isstart = false;
+    static boolean isending = false;
 
     TimeReceive listner;
 
@@ -35,26 +35,20 @@ public class TimePicker extends DialogFragment implements TimePickerDialog.OnTim
         int hour = c.get(Calendar.HOUR_OF_DAY);
         int minute = c.get(Calendar.MINUTE);
 
-        TimePickerDialog timePickerDialog = new TimePickerDialog(getActivity(),this,hour,minute,false);
-        if(count==1) {
+        TimePickerDialog timePickerDialog = new TimePickerDialog(getActivity(), this, hour, minute, false);
+        if (count == 1) {
             timePickerDialog.setMessage("Ending Time");
-            isending=true;
+            isending = true;
 
-        }
-        else if(count==2)
-        {
+        } else if (count == 2) {
             timePickerDialog.setMessage("Starting Time");
-            isstart=true;
+            isstart = true;
 
-            count=0;
+            count = 0;
         }
-
-
 
 
         return timePickerDialog;
-
-
 
 
     }
@@ -62,34 +56,26 @@ public class TimePicker extends DialogFragment implements TimePickerDialog.OnTim
     @Override
     public void onTimeSet(android.widget.TimePicker view, int hourOfDay, int minute) {
 
-        mMap = (MapsActivity)getActivity();
+        mMap = (MapsActivity) getActivity();
 
-        listner =(TimeReceive)mMap;
+        listner = (TimeReceive) mMap;
 
-       // Log.e("time","hour:"+hourOfDay+"::minute:"+minute);
+        // Log.e("time","hour:"+hourOfDay+"::minute:"+minute);
 
         final Calendar c = Calendar.getInstance();
         int hour = c.get(Calendar.HOUR_OF_DAY);
         int minutee = c.get(Calendar.MINUTE);
 
-      //  Log.e("timeofsystem","hour:"+hourOfDay+"::minute:"+minute);
+        //  Log.e("timeofsystem","hour:"+hourOfDay+"::minute:"+minute);
 
 
-        if(isstart)
-        {
+        if (isstart) {
             mMap.passtime(hourOfDay, minute, true);
-            isstart=false;
-        }
-        else if(isending)
-        {
+            isstart = false;
+        } else if (isending) {
             mMap.passtime(hourOfDay, minute, false);
-            isending=false;
+            isending = false;
         }
-
-
-
-
-
 
 
     }

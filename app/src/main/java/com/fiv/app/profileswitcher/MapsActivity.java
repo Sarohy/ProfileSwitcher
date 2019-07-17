@@ -44,7 +44,7 @@ import com.google.android.gms.maps.model.MarkerOptions;
 import java.util.ArrayList;
 
 
-public class MapsActivity extends FragmentActivity implements TimeReceive,OnlocReceive,OnMapReadyCallback, /* LocationListener,*/ GoogleMap.OnMarkerClickListener/*, GoogleApiClient.OnConnectionFailedListener, GoogleApiClient.ConnectionCallbacks*/ {
+public class MapsActivity extends FragmentActivity implements TimeReceive, OnlocReceive, OnMapReadyCallback, /* LocationListener,*/ GoogleMap.OnMarkerClickListener/*, GoogleApiClient.OnConnectionFailedListener, GoogleApiClient.ConnectionCallbacks*/ {
     private GoogleMap mMap;
     Marker m;
     int loccount;
@@ -55,25 +55,26 @@ public class MapsActivity extends FragmentActivity implements TimeReceive,OnlocR
     int PLACE_AUTOCOMPLETE_REQUEST_CODE = 1;
     private final int MY_PERMISSIONS_REQUEST_CODE = 1;
     private final static int CONNECTION_FAILURE_RESOLUTION_REQUEST = 9000;
-    public GoogleApiClient getmGoogleApiClient()
-    {
+
+    public GoogleApiClient getmGoogleApiClient() {
         return mGoogleApiClient;
     }
+
     boolean bound = false;
     LocationUpdateService locationService;
     public ServiceConnection serviceConnection;
     Intent serviceIntent;
     PlaceAutocompleteFragment autocompleteFragment;
     AutocompleteFilter typeFilter;
-    Time current_time=null;
-    Time StartTime=null;
-    Time EndTime=null;
+    Time current_time = null;
+    Time StartTime = null;
+    Time EndTime = null;
     Location fakelocation;
     int zoom = 16;
-    int radius=100;
-    String curr_location_name="";
+    int radius = 100;
+    String curr_location_name = "";
     ArrayList<PinableLocation> Pinnablelocations;
-    boolean viewsingle_location=false;
+    boolean viewsingle_location = false;
     SeekBar seekBar;
     Circle previousCircle;
     Marker previousMarker;
@@ -97,14 +98,13 @@ public class MapsActivity extends FragmentActivity implements TimeReceive,OnlocR
         seekBar.setVisibility(View.INVISIBLE);
         fab.setVisibility(View.INVISIBLE);
         fakelocation = new Location("");
-        StartTime  = new Time();
+        StartTime = new Time();
         EndTime = new Time();
         current_time = new Time();
-        if(getIntent().getSerializableExtra("location")!=null)
-        {
-            viewsingle_location=true;
+        if (getIntent().getSerializableExtra("location") != null) {
+            viewsingle_location = true;
         }
-       autocompleteFragment = (PlaceAutocompleteFragment)
+        autocompleteFragment = (PlaceAutocompleteFragment)
                 getFragmentManager().findFragmentById(R.id.place_autocomplete_fragment);
         autocompleteFragment.setOnPlaceSelectedListener(new PlaceSelectionListener() {
             @Override
@@ -113,13 +113,14 @@ public class MapsActivity extends FragmentActivity implements TimeReceive,OnlocR
                 Log.i(TAG, "Place: ------------------------>" + place.getName());
                 fab.setVisibility(View.VISIBLE);
                 seekBar.setVisibility(View.VISIBLE);
-                LatLng latlong= place.getLatLng();
+                LatLng latlong = place.getLatLng();
                 curr_location_name = place.getName().toString();
                 fakelocation.setLatitude(latlong.latitude);
                 fakelocation.setLongitude(latlong.longitude);
                 handleLocationDynamicCircle(fakelocation);
-                Toast.makeText(MapsActivity.this, "place:"+place.getName(), Toast.LENGTH_SHORT).show();
+                Toast.makeText(MapsActivity.this, "place:" + place.getName(), Toast.LENGTH_SHORT).show();
             }
+
             @Override
             public void onError(Status status) {
 
@@ -128,29 +129,27 @@ public class MapsActivity extends FragmentActivity implements TimeReceive,OnlocR
         serviceConnection = new ServiceConnection() {
             @Override
             public void onServiceConnected(ComponentName name, IBinder service) {
-                locationService = ((LocationUpdateService.localBinder)service).getservice();
+                locationService = ((LocationUpdateService.localBinder) service).getservice();
                 locationService.passClassrefrence(MapsActivity.this);
-                bound=true;
-             //   Toast.makeText(MapsActivity.this, "bound", Toast.LENGTH_SHORT).show();
+                bound = true;
+                //   Toast.makeText(MapsActivity.this, "bound", Toast.LENGTH_SHORT).show();
             }
+
             @Override
             public void onServiceDisconnected(ComponentName name) {
                 bound = false;
-             //   Toast.makeText(MapsActivity.this, "not_bound", Toast.LENGTH_SHORT).show();
+                //   Toast.makeText(MapsActivity.this, "not_bound", Toast.LENGTH_SHORT).show();
 
             }
         };
-        if (ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED)
-        {
+        if (ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            //    Toast.makeText(MapsActivity.this, "req permission", Toast.LENGTH_SHORT).show();
+                //    Toast.makeText(MapsActivity.this, "req permission", Toast.LENGTH_SHORT).show();
                 requestPermissions(new String[]{android.Manifest.permission.ACCESS_FINE_LOCATION, android.Manifest.permission.ACCESS_COARSE_LOCATION}, MY_PERMISSIONS_REQUEST_CODE);
             }
-        }
-        else
-        {
+        } else {
             // location = LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient);
-            if(viewsingle_location==false) {
+            if (viewsingle_location == false) {
                 serviceIntent = new Intent(MapsActivity.this, LocationUpdateService.class);
                 startService(serviceIntent);
                 bound = bindService(serviceIntent, serviceConnection, BIND_AUTO_CREATE);
@@ -172,16 +171,17 @@ public class MapsActivity extends FragmentActivity implements TimeReceive,OnlocR
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
         view_single_location();
-        if(viewsingle_location==false) {
+        if (viewsingle_location == false) {
             handlelocation_from_main_list();
             seekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
                 @Override
                 public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
                     radius = progress;
-                  // LatLng latLng= new LatLng(fakelocation.getLatitude(),fakelocation.getLongitude());
+                    // LatLng latLng= new LatLng(fakelocation.getLatitude(),fakelocation.getLongitude());
                     // drawCircleDynamic(latLng);
                     handleLocationDynamicCircle(fakelocation);
                 }
+
                 @Override
                 public void onStartTrackingTouch(SeekBar seekBar) {
 
@@ -207,7 +207,7 @@ public class MapsActivity extends FragmentActivity implements TimeReceive,OnlocR
                     seekBar.setVisibility(View.VISIBLE);
                     fakelocation.setLatitude(latLng.latitude);
                     fakelocation.setLongitude(latLng.longitude);
-                      handleLocationDynamicCircle(fakelocation);
+                    handleLocationDynamicCircle(fakelocation);
                 }
             });
         }
@@ -221,15 +221,16 @@ public class MapsActivity extends FragmentActivity implements TimeReceive,OnlocR
         String s = marker.getTitle();
         return true;
     }
+
     @Override
     protected void onPause() {
         super.onPause();
-        radius=100;
-        if(serviceIntent!=null && bound ==true ) {
+        radius = 100;
+        if (serviceIntent != null && bound == true) {
             locationService.stopupdates();
             unbindService(serviceConnection);
             stopService(serviceIntent);
-            bound=false;
+            bound = false;
         }
         Log.i(TAG, "inOnpause---------------------->.");
     }
@@ -246,107 +247,99 @@ public class MapsActivity extends FragmentActivity implements TimeReceive,OnlocR
         Log.d(TAG, location.toString());
         double currentLatitude = location.getLatitude();
         double currentLongitude = location.getLongitude();
-       Toast.makeText(MapsActivity.this, "lat:"+currentLatitude+"  lang:"+currentLongitude, Toast.LENGTH_SHORT).show();
+        Toast.makeText(MapsActivity.this, "lat:" + currentLatitude + "  lang:" + currentLongitude, Toast.LENGTH_SHORT).show();
         LatLng latLng = new LatLng(currentLatitude, currentLongitude);
         mMap.getUiSettings().setAllGesturesEnabled(true);
-        if(location.getProvider().isEmpty()) // if this is the selected user location then draw a circle around it
+        if (location.getProvider().isEmpty()) // if this is the selected user location then draw a circle around it
         {
             drawCircle(latLng);
-        }
-        else
-        {
+        } else {
 
             MarkerOptions options = new MarkerOptions()
-                .position(latLng)
-                .title("I am here!");
-        if(m!=null)
-            m.remove();
+                    .position(latLng)
+                    .title("I am here!");
+            if (m != null)
+                m.remove();
 
-        m =  mMap.addMarker(options);
+            m = mMap.addMarker(options);
         }
         mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(latLng, zoom));
     }
 
 
-
-    private void handleLocationDynamicCircle(Location location)
-    {
+    private void handleLocationDynamicCircle(Location location) {
         Log.i(TAG, "in handle new location------------------------------->.");
         Log.d(TAG, location.toString());
         double currentLatitude = location.getLatitude();
         double currentLongitude = location.getLongitude();
         LatLng latLng = new LatLng(currentLatitude, currentLongitude);
         mMap.getUiSettings().setAllGesturesEnabled(true);
-        if(location.getProvider().isEmpty()) // if this is the selected user location then draw a circle around it
+        if (location.getProvider().isEmpty()) // if this is the selected user location then draw a circle around it
         {
             drawCircleDynamic(latLng);
         }
         mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(latLng, zoom));
     }
 
-    private void drawCircleDynamic(LatLng location)
-    {
-        if(previousCircle!=null && previousMarker!=null)
-        {
+    private void drawCircleDynamic(LatLng location) {
+        if (previousCircle != null && previousMarker != null) {
             previousCircle.remove();
             previousMarker.remove();
         }
         CircleOptions options = new CircleOptions();
-        options.center( location );
+        options.center(location);
         //Radius in meters
-        options.radius( radius );
+        options.radius(radius);
         options.fillColor(0x44ff0000);
-        options.strokeColor(  0xffff0000 );
-        options.strokeWidth( 8 );
+        options.strokeColor(0xffff0000);
+        options.strokeWidth(8);
         Bitmap b = getBitmap(R.drawable.ic_place_black_24dp);
         MarkerOptions markerOptions;
-        if(b!=null)
-        {
+        if (b != null) {
             markerOptions = new MarkerOptions().icon(BitmapDescriptorFactory.fromBitmap(b)).anchor(0.5f, 1).position(location).title("selected location");
-            previousMarker=mMap.addMarker(markerOptions);
+            previousMarker = mMap.addMarker(markerOptions);
         }
         previousCircle = mMap.addCircle(options);
     }
 
 
-    private void drawCircle( LatLng location ) {
+    private void drawCircle(LatLng location) {
 
-        if(previousCircle!=null && previousMarker!=null)
-        {
+        if (previousCircle != null && previousMarker != null) {
             previousCircle.remove();
             previousMarker.remove();
             // this is because now when we select a new location after selecting a location then we donot want to delete circle of previously selected location
-            previousMarker=null;
-            previousMarker=null;
+            previousMarker = null;
+            previousMarker = null;
 
         }
         CircleOptions options = new CircleOptions();
-        options.center( location );
+        options.center(location);
         //Radius in meters
-        options.radius( radius );
+        options.radius(radius);
         options.fillColor(0x44ff0000);
-        options.strokeColor(  0xffff0000 );
-        options.strokeWidth( 8 );
+        options.strokeColor(0xffff0000);
+        options.strokeWidth(8);
         Bitmap b = getBitmap(R.drawable.ic_place_black_24dp);
         MarkerOptions markerOptions;
-        if(b!=null)
-        {
+        if (b != null) {
             markerOptions = new MarkerOptions().icon(BitmapDescriptorFactory.fromBitmap(b)).anchor(0.5f, 1).position(location).title("selected location");
             mMap.addMarker(markerOptions);
         }
         previousCircle = mMap.addCircle(options);
     }
-    public  void refresh(View v)
-    {
+
+    public void refresh(View v) {
         finish();
         startActivity(getIntent());
     }
+
     @Override
     public void onreceive(Location l) {
         loccount++;
-        if(loccount==1)
+        if (loccount == 1)
             handleNewLocation(l);
-        if(loccount==5) {
+        if (loccount == 5) {
             if (serviceIntent != null && bound == true) {
 
                 handleNewLocation(l);
@@ -360,14 +353,13 @@ public class MapsActivity extends FragmentActivity implements TimeReceive,OnlocR
         }
     }
 
-        @Override
+    @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
         if (requestCode == MY_PERMISSIONS_REQUEST_CODE) {
-            if (grantResults[0] == PackageManager.PERMISSION_GRANTED && grantResults[1] == PackageManager.PERMISSION_GRANTED)
-            {
+            if (grantResults[0] == PackageManager.PERMISSION_GRANTED && grantResults[1] == PackageManager.PERMISSION_GRANTED) {
                 try {
-                    if(viewsingle_location==false) {
+                    if (viewsingle_location == false) {
                         serviceIntent = new Intent(MapsActivity.this, LocationUpdateService.class);
                         startService(serviceIntent);
                         bound = bindService(serviceIntent, serviceConnection, BIND_AUTO_CREATE);
@@ -385,31 +377,31 @@ public class MapsActivity extends FragmentActivity implements TimeReceive,OnlocR
     @Override
     protected void onResume() {
         Log.e(TAG, "inOresume---------------------->.");
-        radius=100;
+        radius = 100;
         super.onResume();
     }
 
     @Override
     protected void onDestroy() {
-        if(serviceIntent!=null && bound ==true ) {
+        if (serviceIntent != null && bound == true) {
             locationService.stopupdates();
             unbindService(serviceConnection);
             stopService(serviceIntent);
-            bound=false;
+            bound = false;
         }
         super.onDestroy();
     }
-    private void buildAlertMessageConfirmation(final Location location)
-    {
+
+    private void buildAlertMessageConfirmation(final Location location) {
         final AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setMessage("Do you really want to select this location?")
                 .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
                         DialogFragment timepicker = new TimePicker();
-                        timepicker.show(getSupportFragmentManager(),"timePicker");
+                        timepicker.show(getSupportFragmentManager(), "timePicker");
                         DialogFragment timepicker2 = new TimePicker();
-                        timepicker2.show(getSupportFragmentManager(),"timePicker2");
+                        timepicker2.show(getSupportFragmentManager(), "timePicker2");
                     }
                 })
                 .setNegativeButton("No", new DialogInterface.OnClickListener() {
@@ -421,6 +413,7 @@ public class MapsActivity extends FragmentActivity implements TimeReceive,OnlocR
         final AlertDialog alert = builder.create();
         alert.show();
     }
+
     private Bitmap getBitmap(int drawableRes) {
         Drawable drawable = getResources().getDrawable(drawableRes);
         Canvas canvas = new Canvas();
@@ -430,106 +423,93 @@ public class MapsActivity extends FragmentActivity implements TimeReceive,OnlocR
         drawable.draw(canvas);
         return bitmap;
     }
+
     @Override
-    public void passtime(int hourOfDay,int minute,boolean is_start_time) {
-        current_time = convert24hourtoAm_Pm(hourOfDay,minute);
-        if(is_start_time==false)
-        {
-            EndTime=new Time(current_time.getHour(),current_time.getMinute(),current_time.getAm_pm());
+    public void passtime(int hourOfDay, int minute, boolean is_start_time) {
+        current_time = convert24hourtoAm_Pm(hourOfDay, minute);
+        if (is_start_time == false) {
+            EndTime = new Time(current_time.getHour(), current_time.getMinute(), current_time.getAm_pm());
+            current_time.clear();
+        } else {
+            StartTime = new Time(current_time.getHour(), current_time.getMinute(), current_time.getAm_pm());
             current_time.clear();
         }
-        else
-        {
-            StartTime=new Time(current_time.getHour(),current_time.getMinute(),current_time.getAm_pm());
-            current_time.clear();
-        }
-        if(StartTime!=null && EndTime!=null)
-        {
-            if(!StartTime.isEmpty()&&!EndTime.isEmpty())
-            {
+        if (StartTime != null && EndTime != null) {
+            if (!StartTime.isEmpty() && !EndTime.isEmpty()) {
                 handleNewLocation(fakelocation);
-                Toast.makeText(MapsActivity.this, "radius="+radius, Toast.LENGTH_SHORT).show();
-                PinableLocation pinableLocation = new PinableLocation(StartTime,EndTime,fakelocation.getLatitude(),fakelocation.getLongitude(),radius,curr_location_name);
+                Toast.makeText(MapsActivity.this, "radius=" + radius, Toast.LENGTH_SHORT).show();
+                PinableLocation pinableLocation = new PinableLocation(StartTime, EndTime, fakelocation.getLatitude(), fakelocation.getLongitude(), radius, curr_location_name);
                 Intent intent = this.getIntent();
-                intent.putExtra("pinablelocation",pinableLocation);
-                this.setResult(RESULT_OK,intent);
+                intent.putExtra("pinablelocation", pinableLocation);
+                this.setResult(RESULT_OK, intent);
                 finish();
             }
         }
-        Log.e("Enter location","----------------------------->");
+        Log.e("Enter location", "----------------------------->");
     }
-    void handlelocation_from_main_list()
-    {
+
+    void handlelocation_from_main_list() {
         Pinnablelocations = (ArrayList<PinableLocation>) getIntent().getSerializableExtra("array");
-        for (int i=0;i<Pinnablelocations.size();i++)
-        {
-            Location fakelocation=new Location("");
+        for (int i = 0; i < Pinnablelocations.size(); i++) {
+            Location fakelocation = new Location("");
             fakelocation.setLatitude(Pinnablelocations.get(i).getLatitude());
             fakelocation.setLongitude(Pinnablelocations.get(i).getLongitude());
-            radius=Pinnablelocations.get(i).getRadius();
+            radius = Pinnablelocations.get(i).getRadius();
             handleNewLocation(fakelocation);
         }
     }
-    void view_single_location()
-    {
+
+    void view_single_location() {
         PinableLocation location = (PinableLocation) getIntent().getSerializableExtra("location");
-        if(location!=null) {
+        if (location != null) {
             autocompleteFragment.setUserVisibleHint(false);
             mMap.getUiSettings().setAllGesturesEnabled(false);
             Location fakelocation = new Location("");
             fakelocation.setLatitude(location.getLatitude());
             fakelocation.setLongitude(location.getLongitude());
             viewsingle_location = true;
-            radius=location.getRadius();
+            radius = location.getRadius();
             handleNewLocation(fakelocation);
         }
     }
+
     @Override
     protected void onStart() {
         super.onStart();
-        Log.e("onStart","------------------------->");
+        Log.e("onStart", "------------------------->");
     }
-   static public Time convert24hourtoAm_Pm(int hourOfDay, int minute)
-   {
-        String h="",am_pm="",m="";
+
+    static public Time convert24hourtoAm_Pm(int hourOfDay, int minute) {
+        String h = "", am_pm = "", m = "";
         Time t;
-        if(hourOfDay>12)
-        {
-            h= String.valueOf(hourOfDay-12);
-            am_pm="pm";
-        }
-        else if(hourOfDay==0)
-        {
-            h= String.valueOf(12);
-            am_pm="am";
-        }
-        else if(hourOfDay==12)
-        {
-            h= String.valueOf(12);
-            am_pm="pm";
-         }
-        else if(hourOfDay<12)
-        {
-            h= String.valueOf(hourOfDay);
-            am_pm="am";
+        if (hourOfDay > 12) {
+            h = String.valueOf(hourOfDay - 12);
+            am_pm = "pm";
+        } else if (hourOfDay == 0) {
+            h = String.valueOf(12);
+            am_pm = "am";
+        } else if (hourOfDay == 12) {
+            h = String.valueOf(12);
+            am_pm = "pm";
+        } else if (hourOfDay < 12) {
+            h = String.valueOf(hourOfDay);
+            am_pm = "am";
 
         }
-        m= String.valueOf(minute);
-        if(m.length()==1)
-        {
-            String temp=m;
-            m="";
-            m=m+"0";
-            m=m+temp;
+        m = String.valueOf(minute);
+        if (m.length() == 1) {
+            String temp = m;
+            m = "";
+            m = m + "0";
+            m = m + temp;
         }
-        if(h.length()==1)
-        {
-            String temp=h;
-            h="";
-            h=h+"0";
-            h=h+temp;
+        if (h.length() == 1) {
+            String temp = h;
+            h = "";
+            h = h + "0";
+            h = h + temp;
         }
-        t= new Time(h,m,am_pm);
+        t = new Time(h, m, am_pm);
         return t;
     }
 }
